@@ -1,73 +1,174 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# [API] Main API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
+# Installing
+Easy peasy lemon squeezy:
+```
 $ npm install
 ```
 
-## Running the app
+## Configuring
+The application use just one database: [Postgres](https://www.postgresql.org/). For the fastest setup is recommended to use [docker](https://www.docker.com), see below how to setup the database.
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+### PostgresSQL
+Store all application data. You can create a PostgresSQL container like so:
+```
+docker run \
+  --name kuanto-kusta-desafio \
+  -e POSTGRES_USER=kuantokusta \
+  -e POSTGRES_PASSWORD="kuantokusta" \
+  -e POSTGRES_DB=kuantokusta-db \
+  -p 5432:5432 \
+  -d \
+  postgres
 ```
 
-## Test
+# Usage
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+Run migration first
+```
+$ npm run typeorm migration:run
 ```
 
-## Support
+To start up the app run:
+```
+$ npm run dev
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Error Handling
+Instead of only throw a simple message and HTTP Status Code this API return friendly errors:
+```json
+{
+  "statusCode": 400,
+  "message": "You are already registered",
+}
+```
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
-## License
+## Bearer Token
+A few routes expect a Bearer Token in an `Authorization` header.
 
-Nest is [MIT licensed](LICENSE).
+```
+GET http://localhost:3000/shoppingcarts Authorization: Bearer <token>
+```
+
+
+
+## Routes
+|route|HTTP Method|pagination|params|description|auth method
+|:---|:---:|:---:|:---:|:---|:---:
+|`/authenticate`|POST|:x:|Body  `email`, `password`.| return jwt token.|:x:
+|`/users`|POST|:x:|Body  `name`, `email`, `password`.| create a user.|:x:
+|`/users`|GET|:x:|:x:| List all users.|:x:
+|`/users/:id`|DELETE|:x:| params user id |Delete a user.|:x:
+|`/shoppingcarts/product`|POST|:x:|Body  `productId`, `price`.|insert one product into shopping cart.|Bearer
+|`/shoppingcarts`|GET|:x:| - |Get ShoppingCart.|Bearer
+|`/shoppingcarts/remove/product/:id`|DELETE|:x:| params product id |Remove the product from ShoppingCart.|Bearer
+|`/products`|GET|:x:| - |List all Products.|Bearer
+
+
+> Routes with `Bearer` as auth method expect an `Authorization` header.
+
+### Requests
+
+* `POST /authenticate`
+
+Request body:
+```json
+{
+	"email":"email@email.com",
+	"password":"123321"
+}
+```
+Response body:
+```json
+{
+  "user": {
+    "name": "user",
+    "email": "email@email.com"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhkN2QwYTdmLTllMzgtNDFkOC1iYjE5LTk2ZjIyOWY3ZjcxNyIsIm5hbWUiOiJBbmRlcnNvbiIsImlhdCI6MTYyMjk5NDkxMCwiZXhwIjoxNjIzMDgxMzEwfQ.0Ckp211-gjtvM2vQgXCuLd-Xo2pm0CwJnvMNYPOOf6s"
+}
+```
+
+
+* `POST /users`
+
+Request body:
+```json
+{
+	"name":"user",
+	"email":"email@email.com",
+	"password":"123321"
+}
+```
+
+* `GET /users`
+
+Response body:
+```json
+[
+  {
+	"name":"user",
+	"email":"email@email.com",
+	"password":"123321"
+  }
+]
+```
+* `DELETE /users/:id`
+
+Response body: status code 200
+
+
+
+* `GET /products`
+
+Response body:
+```json
+[
+  {
+    "id": "60bbb475ff0a1853c51d56d1",
+    "name": "arroz",
+    "price": 192
+  },
+  {
+    "id": "60bbb4a5ff0a1853c51d56d2",
+    "name": "arroz",
+    "price": 192
+  }
+]
+```
+
+* `POST /shoppingcarts/product`
+
+Request body:
+```json
+{
+	"productId":"60bbb4d351eb3353ec6eb1fa",
+	"price":20
+}
+```
+
+* `GET /shoppingcarts`
+
+Response body:
+```json
+{
+  "userId": "8d7d0a7f-9e38-41d8-bb19-96f229f7f717",
+  "shoppingCartId": "88f043c1-c5c7-4884-8953-28d06e96bca2",
+  "totalQuantity": 2,
+  "totalPrice": "40.00",
+  "products": [
+    {
+      "productId": "60bbb4d351eb3353ec6eb1fa",
+      "price": "40.00",
+      "quantity": 2
+    }
+  ]
+}
+
+```
+
+* `DELETE /shoppingcarts/remove/product/:id`
+
+Response body: status code 200
