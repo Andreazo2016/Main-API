@@ -55,16 +55,16 @@ GET http://localhost:3000/shoppingcarts Authorization: Bearer <token>
 
 
 ## Routes
-|route|HTTP Method|pagination|params|description|auth method
-|:---|:---:|:---:|:---:|:---|:---:
-|`/authenticate`|POST|:x:|Body  `email`, `password`.| return jwt token.|:x:
-|`/users`|POST|:x:|Body  `name`, `email`, `password`.| create a user.|:x:
-|`/users`|GET|:x:|:x:| List all users.|:x:
-|`/users/:id`|DELETE|:x:| params user id |Delete a user.|:x:
-|`/shoppingcarts/product`|POST|:x:|Body  `productId`, `price`.|insert one product into shopping cart.|Bearer
-|`/shoppingcarts`|GET|:x:| - |Get ShoppingCart.|Bearer
-|`/shoppingcarts/remove/product/:id`|DELETE|:x:| params product id |Remove the product from ShoppingCart.|Bearer
-|`/products`|GET|:x:| - |List all Products.|Bearer
+|route|HTTP Method|params|description|auth method
+|:---|:---:|:---:|:---|:---:
+|`/authenticate`|POST|Body  `email`, `password`.| return jwt token.|:x:
+|`/users`|POST|Body  `name`, `email`, `password`.| create a user.|:x:
+|`/users`|GET|:x:| List all users.|:x:
+|`/users/:id`|DELETE| params user id |Delete a user.|:x:
+|`/shoppingcarts/product`|POST|Body  `productId`, `price`.|insert one product into shopping cart.|Bearer
+|`/shoppingcarts`|GET| - |Get ShoppingCart.|Bearer
+|`/shoppingcarts/remove/product/:id`|DELETE| params product id |Remove the product from ShoppingCart.|Bearer
+|`/products`|GET| - |List all Products.|Bearer
 
 
 > Routes with `Bearer` as auth method expect an `Authorization` header.
